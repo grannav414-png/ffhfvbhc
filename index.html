@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Наша история</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Pacifico&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background-image: url('kletka.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family: 'Playfair Display', serif;
+            overflow-x: hidden;
+            padding: 20px;
+            background-color: #fce4ec;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(252, 228, 236, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 0;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            padding: 30px 0 20px;
+        }
+        .header h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.2rem;
+            color: #d81b60;
+            text-decoration: underline;
+            text-decoration-color: #f06292;
+            text-decoration-style: wavy;
+            text-underline-offset: 8px;
+        }
+        .days-counter {
+            font-size: 1.5rem;
+            color: #ad1457;
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(12px);
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 50px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .days-counter:hover {
+            transform: scale(1.05);
+        }
+        .days-counter.playing {
+            background: #d81b60;
+            color: #fff;
+        }
+        .section {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 40px 30px;
+            margin: 40px 0;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: #880e4f;
+            margin-bottom: 30px;
+            font-family: 'Pacifico', cursive;
+            text-decoration: underline;
+            text-decoration-color: #f06292;
+            text-decoration-style: wavy;
+        }
+        .story-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        .flip-card {
+            width: 240px;
+            height: 320px;
+            perspective: 1000px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s cubic-bezier(0.23,1,0.32,1);
+            transform-style: preserve-3d;
+            border-radius: 20px;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 16px;
+            text-align: center;
+        }
+        .flip-card-front {
+            background: linear-gradient(135deg, #f8bbd0, #fce4ec);
+            border: 2px solid #fff;
+        }
+        .flip-card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        .flip-card-back {
+            background: linear-gradient(135deg, #f06292, #ec407a);
+            color: #fff;
+            transform: rotateY(180deg);
+            border: 2px solid #fff;
+            font-size: 1.2rem;
+            font-family: 'Pacifico', cursive;
+            padding: 20px;
+        }
+        .music-trigger {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #d81b60;
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+            box-shadow: 0 4px 15px rgba(233,30,99,0.4);
+        }
+        .music-trigger.playing {
+            background: #d81b60;
+            color: #fff;
+        }
+        .carousel-wrapper {
+            position: relative;
+            height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1200px;
+        }
+        .carousel {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            transform-style: preserve-3d;
+            transition: transform 1s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+        .carousel-item {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            left: 50%;
+            top: 50%;
+            margin-left: -100px;
+            margin-top: -100px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border: 3px solid #fff;
+            background: linear-gradient(135deg, #f8bbd0, #f06292);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .carousel-item .assoc-btn {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 30px;
+            padding: 6px 18px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #d81b60;
+            font-family: 'Pacifico', cursive;
+        }
+        .assoc-label {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: 'Pacifico', cursive;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .carousel-item.show-label .assoc-label {
+            opacity: 1;
+        }
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 25px;
+        }
+        .carousel-controls button {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 28px;
+            color: #d81b60;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .love-wrapper {
+            text-align: center;
+            margin: 30px 0 10px;
+        }
+        .love-btn {
+            display: inline-block;
+            font-size: 3.8rem;
+            font-family: 'Pacifico', cursive;
+            color: #d81b60;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(12px);
+            padding: 20px 60px;
+            border-radius: 80px;
+            border: 2px solid rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+        .love-btn:hover {
+            transform: scale(1.05);
+        }
+        #hearts-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        @media (max-width: 700px) {
+            .header h1 { font-size: 2.4rem; }
+            .flip-card { width: 180px; height: 240px; }
+            .carousel-item { width: 140px; height: 140px; margin-left: -70px; margin-top: -70px; }
+            .carousel { width: 180px; height: 180px; }
+            .love-btn { font-size: 2.6rem; padding: 14px 40px; }
+        }
+        @media (max-width: 480px) {
+            .flip-card { width: 150px; height: 200px; }
+            .carousel-item { width: 110px; height: 110px; margin-left: -55px; margin-top: -55px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="hearts-canvas"></canvas>
+    <div class="container">
+        <header class="header">
+            <h1>Наша история</h1>
+            <div class="days-counter" id="days-counter">0 дней вместе</div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title">Наши моменты</h2>
+            <div class="story-grid" id="story-grid"></div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">С чем у меня ассоциируешься ты</h2>
+            <div class="carousel-wrapper">
+                <div class="carousel" id="carousel"></div>
+            </div>
+            <div class="carousel-controls">
+                <button id="carousel-prev">◀</button>
+                <button id="carousel-next">▶</button>
+            </div>
+        </section>
+
+        <div class="love-wrapper">
+            <div class="love-btn" id="love-btn">Люблю</div>
+        </div>
+    </div>
+
+    <script>
+        // ДАННЫЕ
+        const startDate = new Date('2025-10-19');
+
+        const storyData = [
+            { photo: 'foto1.jpg', backText: 'самые первые фото, мы даже не думали, что станем настолько близкими' },
+            { photo: 'foto2.jpg', backText: 'эти лавочки стали для нас почти самым важным местом' },
+            { photo: 'foto3.jpg', backText: 'ты такой счастливый' },
+            { photo: 'foto4.jpg', backText: 'здесь мы снова рядом после разлуки' },
+            { photo: 'foto5.jpg', backText: 'ты ооочень красивый бубусёнок' }
+        ];
+
+        const assocData = [
+            { img: 'assoc1.jpg', label: 'Лес — такой спокойный и величественный' },
+            { img: 'assoc2.jpg', label: 'Мультик — смешной, душевный и успокоит в трудный день' },
+            { img: 'assoc3.jpg', label: 'Роллы — никогда не надоедают' },
+            { img: 'assoc4.jpg', label: 'Синий цвет — умиротворяет' },
+            { img: 'assoc5.jpg', label: 'Борец — с тобой не страшно' },
+            { img: 'assoc6.jpg', label: 'Помогатор — поможет, когда опускаются руки' }
+        ];
+
+        // МУЗЫКА
+        const audioPlayers = [];
+        let mainAudio = null;
+
+        // Счётчик дней
+        function updateDays() {
+            const now = new Date();
+            const diff = Math.floor((now - startDate) / (1000*60*60*24));
+            document.getElementById('days-counter').textContent = diff + ' дней вместе';
+        }
+        updateDays();
+
+        // Музыка на счётчике
+        const daysCounter = document.getElementById('days-counter');
+        daysCounter.addEventListener('click', function() {
+            if (!mainAudio) {
+                mainAudio = new Audio('selpharm.mp3');
+                mainAudio.loop = true;
+                audioPlayers.push(mainAudio);
+            }
+            if (mainAudio.paused) {
+                audioPlayers.forEach(a => { if (a !== mainAudio) { a.pause(); a.currentTime = 0; } });
+                mainAudio.play();
+                this.classList.add('playing');
+                this.textContent = this.textContent + ' 🎵';
+            } else {
+                mainAudio.pause();
+                mainAudio.currentTime = 0;
+                this.classList.remove('playing');
+                this.textContent = this.textContent.replace(' 🎵', '');
+            }
+        });
+
+        // Рендер истории
+        const grid = document.getElementById('story-grid');
+        storyData.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'flip-card';
+            const inner = document.createElement('div');
+            inner.className = 'flip-card-inner';
+            const front = document.createElement('div');
+            front.className = 'flip-card-front';
+            const img = document.createElement('img');
+            img.src = item.photo;
+            img.alt = 'Фото';
+            front.appendChild(img);
+            const back = document.createElement('div');
+            back.className = 'flip-card-back';
+            back.textContent = item.backText;
+            inner.appendChild(front);
+            inner.appendChild(back);
+            card.appendChild(inner);
+
+            // Музыка на 3-й карточке (индекс 2)
+            if (idx === 2) {
+                const trigger = document.createElement('button');
+                trigger.className = 'music-trigger';
+                trigger.innerHTML = '🎵';
+                let audio = null;
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (!audio) {
+                        audio = new Audio('tolko_dlya_tebya.mp3');
+                        audio.loop = true;
+                        audioPlayers.push(audio);
+                    }
+                    if (audio.paused) {
+                        audioPlayers.forEach(a => { if (a !== audio) { a.pause(); a.currentTime = 0; } });
+                        audio.play();
+                        this.classList.add('playing');
+                        this.innerHTML = '⏸️';
+                    } else {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        this.classList.remove('playing');
+                        this.innerHTML = '🎵';
+                    }
+                });
+                front.appendChild(trigger);
+            }
+
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.music-trigger')) this.classList.toggle('flipped');
+            });
+            grid.appendChild(card);
+        });
+
+        // Карусель
+        const carousel = document.getElementById('carousel');
+        let currentAngle = 0;
+        const total = assocData.length;
+        const radius = 300;
+
+        assocData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'carousel-item';
+            div.style.transform = `rotateY(${i*(360/total)}deg) translateZ(${radius}px)`;
+            const img = document.createElement('img');
+            img.src = item.img;
+            img.alt = 'Ассоциация';
+            div.appendChild(img);
+            
+            const label = document.createElement('div');
+            label.className = 'assoc-label';
+            label.textContent = item.label;
+            div.appendChild(label);
+
+            const btn = document.createElement('button');
+            btn.className = 'assoc-btn';
+            btn.innerHTML = '❤️';
+            
+            // Музыка на 3-й ассоциации (индекс 2)
+            if (i === 2) {
+                let audio = null;
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (!audio) {
+                        audio = new Audio('svyazany.mp3');
+                        audio.loop = true;
+                        audioPlayers.push(audio);
+                    }
+                    if (audio.paused) {
+                        audioPlayers.forEach(a => { if (a !== audio) { a.pause(); a.currentTime = 0; } });
+                        audio.play();
+                        this.classList.add('playing');
+                        this.innerHTML = '⏸️';
+                        div.classList.add('show-label');
+                    } else {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        this.classList.remove('playing');
+                        this.innerHTML = '❤️';
+                        div.classList.remove('show-label');
+                    }
+                });
+            } else {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    div.classList.add('show-label');
+                    setTimeout(() => div.classList.remove('show-label'), 3000);
+                });
+            }
+
+            div.appendChild(btn);
+            carousel.appendChild(div);
+        });
+
+        function rotateCarousel(angle) {
+            carousel.style.transform = `rotateY(${angle}deg)`;
+        }
+
+        document.getElementById('carousel-next').addEventListener('click', () => {
+            currentAngle -= 360/total;
+            rotateCarousel(currentAngle);
+        });
+        document.getElementById('carousel-prev').addEventListener('click', () => {
+            currentAngle += 360/total;
+            rotateCarousel(currentAngle);
+        });
+
+        // ===== СЕРДЕЧКИ (вместо конфетти) =====
+        const canvas = document.getElementById('hearts-canvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+        let heartsRunning = false;
+        let heartsFrame = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Heart {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = 20 + Math.random() * 30;
+                this.speed = 1.5 + Math.random() * 2.5;
+                this.opacity = 0.7 + Math.random() * 0.3;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 4;
+                this.wobble = Math.random() * 10;
+                this.wobbleSpeed = 0.02 + Math.random() * 0.02;
+                this.color = `hsl(${340 + Math.random() * 20}, 90%, ${60 + Math.random() * 30}%)`;
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y * this.wobbleSpeed) * 1.2;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height + 50) {
+                    this.y = -50;
+                    this.x = Math.random() * canvas.width;
+                    this.size = 20 + Math.random() * 30;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.font = `${this.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = this.color;
+                ctx.fillText('❤️', 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function createHearts(count) {
+            for (let i = 0; i < count; i++) {
+                hearts.push(new Heart());
+            }
+            if (!heartsRunning) {
+                heartsRunning = true;
+                heartsFrame = requestAnimationFrame(drawHearts);
+            }
+        }
+
+        function drawHearts() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(heart => {
+                heart.update();
+                heart.draw();
+            });
+            hearts = hearts.filter(heart => heart.y < canvas.height + 100);
+            if (hearts.length > 0) {
+                heartsFrame = requestAnimationFrame(drawHearts);
+            } else {
+                heartsRunning = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Кнопка "Люблю" — запускает сердечки
+        const loveBtn = document.getElementById('love-btn');
+        loveBtn.addEventListener('click', function() {
+            createHearts(40);
+            document.body.style.transition = 'background 1.5s ease';
+            document.body.style.background = 'linear-gradient(135deg, #ff9a9e, #fecfef, #fdfcfb)';
+            setTimeout(() => {
+                document.body.style.background = 'linear-gradient(135deg, #fce4ec, #f8e8e0, #fce4ec)';
+            }, 3000);
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => { this.style.transform = 'scale(1)'; }, 300);
+        });
+    </script>
+</body>
+</html>
